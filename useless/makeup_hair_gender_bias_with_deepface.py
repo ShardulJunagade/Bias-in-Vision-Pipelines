@@ -126,7 +126,7 @@ def analyze_with_clip(image):
 #############################################
 # Main Task: Makeup/Hair Bias in Gender Detection
 def makeup_hair_gender_detection():
-    st.title("💄 Makeup / Hair Bias in Gender Detection 💇‍♂️")
+    st.header("💄 Makeup / Hair Bias in Gender Detection 💇‍♂️")
     st.markdown(
         "This demo shows potential biases in gender detection. For instance, a woman with short hair might be misclassified as **male**, "
         "and a man with long hair might be misclassified as **female**. Use an image from your computer, a URL, or select one of the pre‐curated examples."

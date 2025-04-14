@@ -20,7 +20,7 @@ def load_clip_model():
     return processor, model
 
 def gender_bias_occupation_detection():
-    st.title("👩‍🔬 Gender Bias in Occupation Detection 👨‍🔬")
+    st.header("👩‍🔬 Gender Bias in Occupation Detection 👨‍🔬")
     st.markdown(
         "This demo highlights potential biases in occupation-related image tagging. "
         "For example, a woman in a lab might be labeled as a **nurse**, while a man in the same lab might be labeled as a **scientist**."
@@ -54,37 +54,40 @@ def gender_bias_occupation_detection():
         st.image(image, caption="Input Image", width=250)
 
         if st.button("🔍 Analyze Image"):
-            with st.spinner(f"Analyzing with {model_choice}..."):
-                if model_choice == "BLIP":
-                    processor, model = load_blip_model()
-                    inputs = processor(image, return_tensors="pt")
-                    out = model.generate(**inputs)
-                    caption = processor.decode(out[0], skip_special_tokens=True)
+            if model_choice not in ["CLIP", "BLIP"]:
+                st.error("⚠️ Please select a valid model.")
+            else:
+                with st.spinner(f"Analyzing with {model_choice}..."):
+                    if model_choice == "BLIP":
+                        processor, model = load_blip_model()
+                        inputs = processor(image, return_tensors="pt")
+                        out = model.generate(**inputs)
+                        caption = processor.decode(out[0], skip_special_tokens=True)
 
-                    st.subheader("📋 Caption")
-                    st.write(f"**{caption}**")
+                        st.subheader("📋 Caption")
+                        st.write(f"**{caption}**")
 
-                elif model_choice == "CLIP":
-                    processor, model = load_clip_model()
-                    texts = ["a nurse", "a doctor", "a scientist", "an engineer"]
-                    inputs = processor(text=texts, images=image, return_tensors="pt", padding=True)
-                    outputs = model(**inputs)
-                    probs = outputs.logits_per_image.softmax(dim=1).detach().numpy()[0]
+                    elif model_choice == "CLIP":
+                        processor, model = load_clip_model()
+                        texts = ["a nurse", "a doctor", "a scientist", "an engineer"]
+                        inputs = processor(text=texts, images=image, return_tensors="pt", padding=True)
+                        outputs = model(**inputs)
+                        probs = outputs.logits_per_image.softmax(dim=1).detach().numpy()[0]
 
-                    st.subheader("📊 Classification Probabilities")
-                    data = {"Label": texts, "Probability": probs}
-                    df = pd.DataFrame(data)
-                    df.index += 1  # Start index from 1
-                    st.table(df)
-                    st.write("**Most likely label**:", texts[probs.argmax()])
+                        st.subheader("📊 Classification Probabilities")
+                        data = {"Label": texts, "Probability": probs}
+                        df = pd.DataFrame(data)
+                        df.index += 1  # Start index from 1
+                        st.table(df)
+                        st.write("**Most likely label**:", texts[probs.argmax()])
 
-                    # Bar plot
-                    fig, ax = plt.subplots(figsize=(6, 4))
-                    ax.barh(texts, probs, color='skyblue')
-                    ax.set_xlim(0, 1)
-                    ax.set_xlabel("Probability")
-                    ax.set_title("Occupation Classification")
-                    st.pyplot(fig)
+                        # Bar plot
+                        fig, ax = plt.subplots(figsize=(6, 4))
+                        ax.barh(texts, probs, color='skyblue')
+                        ax.set_xlim(0, 1)
+                        ax.set_xlabel("Probability")
+                        ax.set_title("Occupation Classification")
+                        st.pyplot(fig)
     else:
         st.warning("⚠️ Please provide an image before analysis.")
 

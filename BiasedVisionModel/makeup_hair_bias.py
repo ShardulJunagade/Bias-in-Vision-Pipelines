@@ -81,7 +81,7 @@ def analyze_with_opencv(image):
 #############################################
 # Main Task: Makeup/Hair Bias in Gender Detection
 def makeup_hair_gender_detection():
-    st.title("💄 Makeup / Hair Bias in Gender Detection 💇‍♂️")
+    st.header("💄 Make-up and Hair Bias in Gender Detection 💇‍♂️")
     st.markdown("""
         This demo investigates biases in vision models related to makeup and hair attributes.. For instance, a woman with short hair might be misclassified as **male**, and a man with long hair might be misclassified as **female**.
         It uses tools like CLIP and OpenCV to analyze and demonstrate these biases.
@@ -120,29 +120,32 @@ def makeup_hair_gender_detection():
         if image is None:
             st.warning("⚠️ Please provide an image before analysis.")
         else:
-            with st.spinner(f"Analyzing with {model_choice}..."):
-                if model_choice == "OpenCV":
-                    result, most_likely = analyze_with_opencv(image)
-                elif model_choice == "CLIP":
-                    result, most_likely = analyze_with_clip(image)
+            if model_choice not in ["OpenCV", "CLIP"]:
+                st.error("⚠️ Please select a valid model.")
+            else:
+                with st.spinner(f"Analyzing with {model_choice}..."):
+                    if model_choice == "OpenCV":
+                        result, most_likely = analyze_with_opencv(image)
+                    elif model_choice == "CLIP":
+                        result, most_likely = analyze_with_clip(image)
 
-            st.subheader(f"📊 {model_choice} Gender Detection Results")
-            if isinstance(result, dict):  # For CLIP or OpenCV single face
-                st.write("Probabilities:")
-                df = pd.DataFrame(list(result.items()), columns=["Label", "Probability"])
-                df.index += 1  # Start index from 1
-                st.table(df)
-                st.write("**Most likely label:**", most_likely)
-                st.write("\n")
-                # Bar plot
-                fig, ax = plt.subplots(figsize=(6, 4))
-                ax.barh(list(result.keys()), list(result.values()), color='skyblue' if model_choice == "CLIP" else 'lightcoral')
-                ax.set_xlim(0, 1)
-                ax.set_xlabel("Probability")
-                ax.set_title("Gender Classification")
-                st.pyplot(fig)
-            else:  # For OpenCV when no faces or multiple faces
-                st.warning(result)
+                st.subheader(f"📊 {model_choice} Gender Detection Results")
+                if isinstance(result, dict):  # For CLIP or OpenCV single face
+                    st.write("Probabilities:")
+                    df = pd.DataFrame(list(result.items()), columns=["Label", "Probability"])
+                    df.index += 1  # Start index from 1
+                    st.table(df)
+                    st.write("**Most likely label:**", most_likely)
+                    st.write("\n")
+                    # Bar plot
+                    fig, ax = plt.subplots(figsize=(6, 4))
+                    ax.barh(list(result.keys()), list(result.values()), color='skyblue' if model_choice == "CLIP" else 'lightcoral')
+                    ax.set_xlim(0, 1)
+                    ax.set_xlabel("Probability")
+                    ax.set_title("Gender Classification")
+                    st.pyplot(fig)
+                else:  # For OpenCV when no faces or multiple faces
+                    st.warning(result)
 
 if __name__ == "__main__":
     makeup_hair_gender_detection()

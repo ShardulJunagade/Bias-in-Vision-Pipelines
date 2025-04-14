@@ -119,7 +119,7 @@ def get_face_crops(image, boxes):
 #############################################
 # Main App
 def skin_tone_bias_face_detection():
-    st.title("👤 Skin Tone Bias in Face Detection")
+    st.header("👤 Skin Tone Bias in Face Detection")
     st.markdown(
         """
         This demo shows potential **skin tone bias** in different face detection models like **Dlib**, **MTCNN**, and **OpenCV**.
@@ -165,57 +165,60 @@ def skin_tone_bias_face_detection():
         if image is None:
             st.warning("⚠️ Please provide an image before detection.")
         else:
-            with st.spinner(f"Detecting faces using {model_choice}..."):
-                if model_choice == "OpenCV":
-                    draw_image, result = detect_faces_opencv(image)
-                elif model_choice == "MTCNN":
-                    draw_image, result = detect_faces_mtcnn(image)
-                elif model_choice == "Dlib":
-                    draw_image, result = detect_faces_dlib(image)
+            if model_choice not in ["OpenCV", "MTCNN", "Dlib"]:
+                st.error("⚠️ Please select a valid model.")
+            else:
+                with st.spinner(f"Detecting faces using {model_choice}..."):
+                    if model_choice == "OpenCV":
+                        draw_image, result = detect_faces_opencv(image)
+                    elif model_choice == "MTCNN":
+                        draw_image, result = detect_faces_mtcnn(image)
+                    elif model_choice == "Dlib":
+                        draw_image, result = detect_faces_dlib(image)
 
-                if result:
-                    st.success(f"✅ Detected {len(result)} face(s) with {model_choice}")
-                    st.image(draw_image, caption=f"{model_choice} Detection Output", use_container_width=True)
-                    # st.subheader("📊 Detection Details")
-                    # df = pd.DataFrame(result)
-                    # df.index += 1  # Start index from 1
-                    # st.table(df)
-                    # Get cropped face images
+                    if result:
+                        st.success(f"✅ Detected {len(result)} face(s) with {model_choice}")
+                        st.image(draw_image, caption=f"{model_choice} Detection Output", use_container_width=True)
+                        # st.subheader("📊 Detection Details")
+                        # df = pd.DataFrame(result)
+                        # df.index += 1  # Start index from 1
+                        # st.table(df)
+                        # Get cropped face images
 
-                    face_images = get_face_crops(image, result)
-                    # Create a DataFrame with Face ID, Confidence, and face image
-                    df_data = [
-                        {
-                            "Face": face_images[i],
-                            "Face ID": result[i]["Face ID"],
-                            "Confidence": result[i]["Confidence"]
-                        }
-                        for i in range(len(result))
-                    ]
+                        face_images = get_face_crops(image, result)
+                        # Create a DataFrame with Face ID, Confidence, and face image
+                        df_data = [
+                            {
+                                "Face": face_images[i],
+                                "Face ID": result[i]["Face ID"],
+                                "Confidence": result[i]["Confidence"]
+                            }
+                            for i in range(len(result))
+                        ]
 
-                    # Display cropped faces in a grid: 2 per row, with confidence below each
-                    st.markdown("### 👤 Cropped Face Previews")
+                        # Display cropped faces in a grid: 2 per row, with confidence below each
+                        st.markdown("### 👤 Cropped Face Previews")
 
-                    num_faces = len(df_data)
-                    cols_per_row = 3
+                        num_faces = len(df_data)
+                        cols_per_row = 3
 
-                    for i in range(0, num_faces, cols_per_row):
-                        cols = st.columns(cols_per_row, gap="large")  # Add space between columns
-                        for j in range(cols_per_row):
-                            if i + j < num_faces:
-                                face_data = df_data[i + j]
-                                with cols[j]:
-                                    st.image(face_data["Face"], use_container_width=True)
-                                    st.markdown(
-                                        f"<div style='text-align: center;'>"
-                                        f"<b>{face_data['Face ID']}</b><br>"
-                                        f"Confidence: <code>{face_data['Confidence']}</code>"
-                                        f"</div>",
-                                        unsafe_allow_html=True
-                                    )
-                        st.markdown("<br>", unsafe_allow_html=True)  # Add space between rows
-                else:
-                    st.warning(f"⚠️ No faces detected by {model_choice}. Try a different model or image.")
+                        for i in range(0, num_faces, cols_per_row):
+                            cols = st.columns(cols_per_row, gap="large")  # Add space between columns
+                            for j in range(cols_per_row):
+                                if i + j < num_faces:
+                                    face_data = df_data[i + j]
+                                    with cols[j]:
+                                        st.image(face_data["Face"], use_container_width=True)
+                                        st.markdown(
+                                            f"<div style='text-align: center;'>"
+                                            f"<b>{face_data['Face ID']}</b><br>"
+                                            f"Confidence: <code>{face_data['Confidence']}</code>"
+                                            f"</div>",
+                                            unsafe_allow_html=True
+                                        )
+                            st.markdown("<br>", unsafe_allow_html=True)  # Add space between rows
+                    else:
+                        st.warning(f"⚠️ No faces detected by {model_choice}. Try a different model or image.")
 
 
 if __name__ == "__main__":

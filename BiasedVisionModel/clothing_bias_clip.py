@@ -18,9 +18,7 @@ def load_clip_model():
 
 def clothing_bias_scene_classification():
 
-    model, processor = load_clip_model()
-
-    st.title("👖 Clothing Bias in Scene Classification 👗")
+    st.header("👖 Clothing Bias in Scene Classification 👗")
     st.markdown("""
     This application explores biases in scene classification models related to clothing attributes.
     It leverages the CLIP model to analyze and highlight these biases.
@@ -60,6 +58,7 @@ def clothing_bias_scene_classification():
         if image is None:
             st.warning("⚠️ Please upload an image, paste a URL, or choose a default image before analysis.")
         else:
+            model, processor = load_clip_model()
             with st.spinner("Analyzing the image, please wait..."):
                 inputs = processor(text=labels, images=image, return_tensors="pt", padding=True)
                 with torch.no_grad():
