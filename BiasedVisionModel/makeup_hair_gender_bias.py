@@ -23,15 +23,28 @@ def load_clip_model():
     processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32", use_fast=False)
     return model, processor
 
+
+#############################################
+# CLIP Gender Detection Function
+def analyze_with_clip(image):
+    model, processor = load_clip_model()
+    candidate_labels = ["male", "female"]
+    inputs = processor(text=candidate_labels, images=image, return_tensors="pt", padding=True)
+    with torch.no_grad():
+        outputs = model(**inputs)
+        probs = outputs.logits_per_image.softmax(dim=1)[0]
+    result = {label: float(prob) for label, prob in zip(candidate_labels, probs)}
+    most_likely = max(result, key=result.get)
+    return result, most_likely
+
+
 #############################################
 # OpenCV Gender Classifier
 def analyze_with_opencv(image):
     # Path to the Caffe model files.
-    gender_proto = "models/deploy_gender.prototxt"
+    gender_proto = "models/gender_deploy.prototxt"
     gender_model = "models/gender_net.caffemodel"
-    
-    if os.path.exists(gender_proto):
-        st.write("Model found")
+
     # Check for model file existence
     if not os.path.exists(gender_proto) or not os.path.exists(gender_model):
         return "OpenCV gender model files not found. Please ensure they exist in the 'models' folder."
@@ -57,29 +70,13 @@ def analyze_with_opencv(image):
                                      swapRB=False)
         net.setInput(blob)
         preds = net.forward()
-        gender = gender_list[preds[0].argmax()]
-        results.append(gender)
-    
-    if results:
-        return results
-    else:
-        return "No faces detected."
+        results = {label: float(prob) for label, prob in zip(gender_list, preds[0])}
+        # Get the label with the highest probability
+        most_likely = max(results, key=results.get)
+        # print(results)
+        return results, most_likely
 
-#############################################
-# CLIP Gender Detection Function
-def analyze_with_clip(image):
-    model, processor = load_clip_model()
-    # Candidate labels for gender
-    candidate_labels = ["male", "female"]
-    inputs = processor(text=candidate_labels, images=image, return_tensors="pt", padding=True)
-    with torch.no_grad():
-        outputs = model(**inputs)
-        probs = outputs.logits_per_image.softmax(dim=1)[0]
-    # Package results in a dictionary
-    result = {label: float(prob) for label, prob in zip(candidate_labels, probs)}
-    # Determine the most likely label
-    most_likely = max(result, key=result.get)
-    return result, most_likely
+
 
 #############################################
 # Main Task: Makeup/Hair Bias in Gender Detection
@@ -90,10 +87,7 @@ def makeup_hair_gender_detection():
         "and a man with long hair might be misclassified as **female**. Use an image from your computer, a URL, or select one of the pre‐curated examples."
     )
 
-    # Choose the model for analysis
     model_choice = st.selectbox("Select a Model", ["OpenCV", "CLIP"])
-    
-    # Image input selection
     input_method = st.selectbox("Select Input Method", ["Default Images", "Upload Image", "Use Image URL"], index=0)
     image = None
 
@@ -110,7 +104,6 @@ def makeup_hair_gender_detection():
             except Exception as e:
                 st.error("Couldn't load image from the provided URL.")
     elif input_method == "Default Images":
-        # Ensure your default images for makeup/hair bias are in the folder 'default_images/makeup_hair_bias'
         default_images = sorted([f for f in os.listdir("default_images/makeup_hair_bias") if f.lower().endswith((".jpg", ".png", ".jpeg"))])
         if default_images:
             default_choice = st.selectbox("Choose from default images", default_images, index=0)
@@ -127,26 +120,28 @@ def makeup_hair_gender_detection():
         if image is None:
             st.warning("⚠️ Please provide an image before analysis.")
         else:
-            if model_choice == "OpenCV":
-                with st.spinner("Analyzing with OpenCV Gender Classifier..."):
-                    result = analyze_with_opencv(image)
-                st.subheader("OpenCV Gender Classifier Results")
-                st.write(result)
-            elif model_choice == "CLIP":
-                with st.spinner("Analyzing with CLIP Gender Detection..."):
+            with st.spinner(f"Analyzing with {model_choice}..."):
+                if model_choice == "OpenCV":
+                    result, most_likely = analyze_with_opencv(image)
+                elif model_choice == "CLIP":
                     result, most_likely = analyze_with_clip(image)
-                st.subheader("📊 CLIP Gender Detection Results")
+
+            st.subheader(f"📊 {model_choice} Gender Detection Results")
+            if isinstance(result, dict):  # For CLIP or OpenCV single face
                 st.write("Probabilities:")
                 df = pd.DataFrame(list(result.items()), columns=["Label", "Probability"])
                 st.table(df)
                 st.write("**Most likely label:**", most_likely)
+                st.write("\n")
                 # Bar plot
                 fig, ax = plt.subplots(figsize=(6, 4))
-                ax.barh(list(result.keys()), list(result.values()), color='skyblue')
+                ax.barh(list(result.keys()), list(result.values()), color='skyblue' if model_choice == "CLIP" else 'lightcoral')
                 ax.set_xlim(0, 1)
                 ax.set_xlabel("Probability")
                 ax.set_title("Gender Classification")
                 st.pyplot(fig)
+            else:  # For OpenCV when no faces or multiple faces
+                st.warning(result)
 
 if __name__ == "__main__":
     makeup_hair_gender_detection()

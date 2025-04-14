@@ -15,7 +15,7 @@ def gender_bias_occupation_detection():
             image = Image.open(uploaded_file).convert('RGB')
         else:
             st.write("No image uploaded. Using default image.")
-            default_path = os.path.join("default_images", "woman_in_lab.jpg")
+            default_path = os.path.join("default_images/occupation_bias", "woman_in_lab.jpg")
             image = Image.open(default_path).convert('RGB')
     else:
         img_url = st.text_input("Enter image URL:")
@@ -23,7 +23,7 @@ def gender_bias_occupation_detection():
             image = Image.open(requests.get(img_url, stream=True).raw).convert('RGB')
         else:
             st.write("No URL provided. Using default image.")
-            default_path = os.path.join("default_images", "woman_in_lab.jpg")
+            default_path = os.path.join("default_images/occupation_bias", "woman_in_lab.jpg")
             image = Image.open(default_path).convert('RGB')
 
     st.image(image, caption="Selected Image", use_column_width=True)
