@@ -122,9 +122,8 @@ def skin_tone_bias_face_detection():
     st.title("👤 Skin Tone Bias in Face Detection")
     st.markdown(
         """
-        This demo shows potential **skin tone bias** in different face detection models.
+        This demo shows potential **skin tone bias** in different face detection models like **Dlib**, **MTCNN**, and **OpenCV**.
         For instance, a group image with diverse skin tones might lead to different detection results across models.
-        
         Try uploading group images with a mix of skin tones to observe how well each model performs.
         """
     )

@@ -21,9 +21,11 @@ def clothing_bias_scene_classification():
     model, processor = load_clip_model()
 
     st.title("👖 Clothing Bias in Scene Classification 👗")
-    st.markdown("Compare how scene labels are predicted based on visual context.")
+    st.markdown("""
+    This application explores biases in scene classification models related to clothing attributes.
+    It leverages the CLIP model to analyze and highlight these biases.
+    """)
 
-    # Let the user choose the input method
     input_method = st.selectbox("Select Input Method", ["Default Images", "Upload Image", "Use Image URL"], index=0)
 
     image = None
