@@ -2,6 +2,8 @@
 
 This repository explores biases in computer vision pipelines, focusing on how AI models can exhibit unintended biases based on factors like gender, clothing, skin tone, and more. The project includes demos and code to highlight these biases and foster awareness.
 
+> **Note for Deployment**: If you plan to deploy this project to Hugging Face Spaces, make sure to use this [specialized requirements file](./requirements_for_huggingface.txt) instead of the default `requirements.txt`. This ensures compatibility with the Hugging Face environment and avoids potential dependency issues.
+
 ## Table of Contents
 - [Introduction](#introduction)
 - [Features](#features)
