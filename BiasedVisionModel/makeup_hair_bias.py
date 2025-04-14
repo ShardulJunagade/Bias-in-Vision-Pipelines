@@ -130,6 +130,7 @@ def makeup_hair_gender_detection():
             if isinstance(result, dict):  # For CLIP or OpenCV single face
                 st.write("Probabilities:")
                 df = pd.DataFrame(list(result.items()), columns=["Label", "Probability"])
+                df.index += 1  # Start index from 1
                 st.table(df)
                 st.write("**Most likely label:**", most_likely)
                 st.write("\n")

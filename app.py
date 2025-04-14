@@ -19,7 +19,7 @@ def main():
         "Skin Tone Bias in Face Detection",
         "Makeup / Hair Bias in Gender Detection",
         "Clothing Bias in Scene Classification"
-    ], index=3)
+    ], index=0)
 
     if task == "Gender Bias in Occupation Detection":
         gender_bias_occupation_detection()

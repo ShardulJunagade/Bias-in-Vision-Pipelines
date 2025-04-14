@@ -68,6 +68,7 @@ def clothing_bias_scene_classification():
             st.subheader("📊 Classification Probabilities")
             data = {"Label": labels, "Probability": probs.numpy()}
             df = pd.DataFrame(data)
+            df.index += 1  # Start index from 1
             st.table(df)
             st.write("**Most likely label**:", labels[probs.argmax().item()])
             st.write("\n")
